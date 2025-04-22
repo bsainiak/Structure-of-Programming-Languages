@@ -25,6 +25,7 @@ grammar = """
     while_statement = "while" "(" expression ")" statement_block
     statement = statement_block | if_statement | while_statement | print_statement | assignment_statement
     program = [ statement { ";" statement } ]
+    username = <identifier>
 """
 
 # --- Parsing Functions and Their Tests ---
@@ -505,6 +506,14 @@ def test_parse_assignment_statement():
     ast, tokens = parse_assignment_statement(tokenize("2"))
     assert ast == {"tag": "number", "value": 2}
 
+def parse_username_statement(tokens):
+    """
+    username = <identifier>
+    """
+    assert tokens[0]["tag"] == "username"
+    tokens = tokens[1:]
+    return {"tag": "username", "value": "bsainiak"}, tokens
+
 def parse_statement(tokens):
     """
     statement = statement_block | if_statement | while_statement | print_statement | assignment_statement
@@ -518,7 +527,17 @@ def parse_statement(tokens):
         return parse_while_statement(tokens)
     if tag == "print":
         return parse_print_statement(tokens)
+    if tag == "username":
+        return parse_username_statement(tokens)
     return parse_assignment_statement(tokens)
+
+def test_parse_username_statement():
+    """
+    username = <identifier>
+    """
+    print("testing parse_username_statement")
+    ast, tokens = parse_username_statement(tokenize("bsainiak"))
+    assert ast == {"tag": "username", "value": "bsainiak"}
 
 def test_parse_statement():
     """
@@ -588,6 +607,7 @@ if __name__ == "__main__":
         test_parse_assignment_statement,
         test_parse_statement,
         test_parse_program,
+        test_parse_username_statement,
     ]
 
     untested_grammar = normalized_grammar

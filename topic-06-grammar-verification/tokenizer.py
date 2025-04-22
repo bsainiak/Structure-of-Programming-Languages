@@ -2,6 +2,7 @@ import re
 
 # Define patterns for tokens
 patterns = [
+    [r"bsainiak", "username"],
     [r"print","print"],
     [r"if","if"],
     [r"else","else"],
@@ -40,6 +41,7 @@ patterns = [
     [r"\.", "."],
     [r"\s+","whitespace"],
     [r".","error"]
+    
 ]
 
 for pattern in patterns:
@@ -69,6 +71,8 @@ def tokenize(characters):
                 token["value"] = int(token["value"])
         if token["tag"] != "whitespace":
             tokens.append(token)
+        if token["tag"] == "_kentid_":
+            token["value"] = "bsainiak"
         position = match.end()
     # append end-of-stream marker
     tokens.append({
@@ -145,6 +149,13 @@ def test_error():
     except Exception as e:
         assert "Syntax error" in str(e),f"Unexpected exception: {e}"
 
+#def test_id():
+    
+    # print("Testing ID")
+    # t = tokenize("_kentid_")
+    # print(t[0]["value"])
+    # assert t[0]["value"] == "bsainiak"
+
 if __name__ == "__main__":
     test_simple_token()
     test_number_token()
@@ -153,3 +164,4 @@ if __name__ == "__main__":
     test_keywords()
     test_identifier_tokens()
     test_error()
+    #test_id()

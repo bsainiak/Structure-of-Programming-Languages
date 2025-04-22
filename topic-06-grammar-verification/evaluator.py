@@ -11,6 +11,8 @@ def evaluate(ast, environment={}):
             value = evaluate(statement, environment)
             last_value = value
         return last_value
+    if ast["tag"] == "username":
+        environment["_kentid_"] = "bsainiak@kent.edu"
     if ast["tag"] == "block":
         for statement in ast["statements"]:
             _ = evaluate(statement, environment)
@@ -201,6 +203,7 @@ def test_evaluate_print():
     assert printed_string == "3"
     assert eval("print 3.14") == None    
     assert printed_string == "3.14"
+    assert eval("homework=1; if(homework){bsainiak; print _kentid_}") == None
 
 def test_evaluate_assignment():
     print("testing evaluate assignment")
@@ -211,6 +214,7 @@ def test_evaluate_assignment():
 def test_if_statement():
     print("testing if statement")
     env = {"x":4,"y":5}
+    #if(1){bsainiak; print(_kentid_)}
     assert eval("if(1){x=8}",env) == None
     assert env["x"] == 8
     assert eval("if(0){x=5}else{y=9}",env) == None
