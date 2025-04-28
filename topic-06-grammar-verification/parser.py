@@ -10,7 +10,7 @@ Parser for simple expressions and statements.
 # Grammar 
 
 grammar = """
-    factor = <number> | <identifier> | "(" expression ")" | "!" expression | "-" expression
+    factor = <number> | <identifier> | "(" expression ")" | "!" expression | "-" expression | "~" expression
     term = factor { "*"|"/" factor }
     arithmetic_expression = term { "+"|"-" term }
     relational_expression = arithmetic_expression { ("<" | ">" | "<=" | ">=" | "==" | "!=") arithmetic_expression }
@@ -32,7 +32,7 @@ grammar = """
 
 def parse_factor(tokens):
     """
-    factor = <number> | <identifier> | "(" expression ")" | "!" expression | "-" expression
+    factor = <number> | <identifier> | "(" expression ")" | "!" expression | "-" expression | "~" expression
     """
     token = tokens[0]
     if token["tag"] == "number":
@@ -49,11 +49,14 @@ def parse_factor(tokens):
     if token["tag"] == "-":
         ast, tokens = parse_expression(tokens[1:])
         return {"tag": "negate", "value": ast}, tokens
+    if token["tag"] == "~":
+        ast, tokens = parse_expression(tokens[1:])
+        return {"tag": "~", "value": ast}, tokens
     raise Exception(f"Unexpected token '{token['tag']}' at position {token['position']}.")
 
 def test_parse_factor():
     """
-    factor = <number> | <identifier> | "(" expression ")" | "!" expression | "-" expression
+    factor = <number> | <identifier> | "(" expression ")" | "!" expression | "-" expression | "~" expression
     """
     print("testing parse_factor()")
     for s in ["1", "22", "333"]:
@@ -94,6 +97,12 @@ def test_parse_factor():
             'right': {'tag': 'number', 'value': 3}
         }
     }
+
+    #Testing the decrement function
+    tokens = tokenize("~4")
+    ast, tokens = parse_factor(tokens)
+    assert ast == {'tag': '~', 'value': {'tag': 'number', 'value': 4}}
+
     tokens = tokenize("!1")
     ast, tokens = parse_factor(tokens)
     assert ast == {'tag': '!', 'value': {'tag': 'number', 'value': 1}}
