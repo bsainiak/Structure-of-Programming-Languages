@@ -52,7 +52,7 @@ def evaluate(ast, environment={}):
             if ast["value"] in parent_environment:
                 return parent_environment[ast["value"]]
         raise Exception(f"Value [{ast["value"]}] not found in environment {environment}.")
-    if ast["tag"] in ["+", "-", "*", "/"]:
+    if ast["tag"] in ["+", "-", "*", "/", "%"]:
         left_value = evaluate(ast["left"], environment)
         right_value = evaluate(ast["right"], environment)
         if ast["tag"] == "+":
@@ -63,12 +63,17 @@ def evaluate(ast, environment={}):
             return left_value * right_value
         if ast["tag"] == "/":
             return left_value / right_value
+        if ast["tag"] == "%":
+            return left_value % right_value
     if ast["tag"] == "negate":
         value = evaluate(ast["value"], environment)
         return -value
     if ast["tag"] == "~":
         value = evaluate(ast["value"], environment)
         return value-1
+    if ast["tag"] == "$":
+        value = evaluate(ast["value"], environment)
+        return value+1
     if ast["tag"] == "&&":
         left_value = evaluate(ast["left"], environment)
         right_value = evaluate(ast["right"], environment)
@@ -159,6 +164,8 @@ def eval(s, environment={}):
 
 def test_evaluate_expression():
     print("testing evaluate expression")
+    assert eval("3%4") == 3
+    assert eval("4%3") == 1
     assert eval("1+2+3") == 6
     assert eval("1+2*3") == 7
     assert eval("(1+2)*3") == 9
@@ -183,6 +190,8 @@ def test_evaluate_expression():
     # print(ast, result)
     # exit(0)
 
+    assert eval ("$5") == 6
+    assert eval ("$(3)") == 4
     assert eval("~4") == 3
     assert eval("~(5)") == 4
     assert eval("-1") == -1
