@@ -2,7 +2,8 @@ import re
 
 # Define patterns for tokens
 patterns = [
-    [r"\$", $],
+    [r"\%", "%"],
+    [r"\$", "$"],
     [r"\~", "~"],
     [r"bsainiak", "username"],
     [r"print","print"],
@@ -86,7 +87,7 @@ def tokenize(characters):
 
 def test_simple_token():
     print("test simple token")
-    examples = "$~+-*/()=;<>{}[]."
+    examples = "%$~+-*/()=;<>{}[]."
     for example in examples:
         t = tokenize(example)[0]
         assert t["tag"] == example
@@ -146,7 +147,7 @@ def test_identifier_tokens():
 def test_error():
     print("test error")
     try:
-        t = tokenize("$1+2")
+        t = tokenize("`1+2")
         assert False, "Should have raised an error for an invalid character."
     except Exception as e:
         assert "Syntax error" in str(e),f"Unexpected exception: {e}"
