@@ -66,6 +66,9 @@ def evaluate(ast, environment={}):
     if ast["tag"] == "negate":
         value = evaluate(ast["value"], environment)
         return -value
+    if ast["tag"] == "~":
+        value = evaluate(ast["value"], environment)
+        return value-1
     if ast["tag"] == "&&":
         left_value = evaluate(ast["left"], environment)
         right_value = evaluate(ast["right"], environment)
@@ -103,9 +106,14 @@ def evaluate(ast, environment={}):
         return left_value != right_value
 
 
+
 def test_evaluate_number():
     print("testing evaluate number")
     assert evaluate({"tag":"number","value":4}) == 4
+
+def test_evaluate_decrement():
+    print("testing evaluate decrement")
+    assert evaluate({"tag":"number","value":3})
 
 def test_evaluate_addition():
     print("testing evaluate addition")
@@ -175,6 +183,8 @@ def test_evaluate_expression():
     # print(ast, result)
     # exit(0)
 
+    assert eval("~4") == 3
+    assert eval("~(5)") == 4
     assert eval("-1") == -1
     assert eval("-(1)") == -1
     assert eval("!1") == False
