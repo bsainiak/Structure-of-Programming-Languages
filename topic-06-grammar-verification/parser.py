@@ -10,8 +10,8 @@ Parser for simple expressions and statements.
 # Grammar 
 
 grammar = """
-    factor = <number> | <identifier> | "(" expression ")" | "!" expression | "-" expression | "~" expression
-    term = factor { "*"|"/" factor }
+    factor = <number> | <identifier> | "(" expression ")" | "!" expression | "-" expression | "~" expression | "$" expression
+    term = factor { "*"|"/"|"%" factor }
     arithmetic_expression = term { "+"|"-" term }
     relational_expression = arithmetic_expression { ("<" | ">" | "<=" | ">=" | "==" | "!=") arithmetic_expression }
     logical_factor = relational_expression
@@ -32,7 +32,7 @@ grammar = """
 
 def parse_factor(tokens):
     """
-    factor = <number> | <identifier> | "(" expression ")" | "!" expression | "-" expression | "~" expression
+    factor = <number> | <identifier> | "(" expression ")" | "!" expression | "-" expression | "~" expression | "$" expression
     """
     token = tokens[0]
     if token["tag"] == "number":
@@ -52,11 +52,14 @@ def parse_factor(tokens):
     if token["tag"] == "~":
         ast, tokens = parse_expression(tokens[1:])
         return {"tag": "~", "value": ast}, tokens
+    if token["tag"] == "$":
+        ast, tokens = parse_expression(tokens[1:])
+        return {"tag": "$", "value": ast}, tokens
     raise Exception(f"Unexpected token '{token['tag']}' at position {token['position']}.")
 
 def test_parse_factor():
     """
-    factor = <number> | <identifier> | "(" expression ")" | "!" expression | "-" expression | "~" expression
+    factor = <number> | <identifier> | "(" expression ")" | "!" expression | "-" expression | "~" expression | "$" expression
     """
     print("testing parse_factor()")
     for s in ["1", "22", "333"]:
@@ -103,16 +106,21 @@ def test_parse_factor():
     ast, tokens = parse_factor(tokens)
     assert ast == {'tag': '~', 'value': {'tag': 'number', 'value': 4}}
 
+    #Testing the increment function
+    tokens = tokenize("$5")
+    ast, tokens = parse_factor(tokens)
+    assert ast == {'tag': '$', 'value': {'tag': 'number', 'value': 5}}
+
     tokens = tokenize("!1")
     ast, tokens = parse_factor(tokens)
     assert ast == {'tag': '!', 'value': {'tag': 'number', 'value': 1}}
 
 def parse_term(tokens):
     """
-    term = factor { "*"|"/" factor }
+    term = factor { "*"|"/"|"%" factor }
     """
     node, tokens = parse_factor(tokens)
-    while tokens[0]["tag"] in ["*", "/"]:
+    while tokens[0]["tag"] in ["*", "/", "%"]:
         tag = tokens[0]["tag"]
         right_node, tokens = parse_factor(tokens[1:])
         node = {"tag": tag, "left": node, "right": right_node}
@@ -120,7 +128,7 @@ def parse_term(tokens):
 
 def test_parse_term():
     """
-    term = factor { "*"|"/" factor }
+    term = factor { "*"|"/"|"%" factor }
     """
     print("testing parse_term()")
     for s in ["1", "22", "333"]:
@@ -144,6 +152,15 @@ def test_parse_term():
             "left": {"tag": "number", "value": 2},
             "right": {"tag": "number", "value": 4},
         },
+        "right": {"tag": "number", "value": 6},
+    }
+
+    #Testing the modulo operator
+    tokens = tokenize("5%6")
+    ast, tokens = parse_term(tokens)
+    assert ast == {
+        "tag": "%",
+        "left": {"tag": "number", "value": 5},
         "right": {"tag": "number", "value": 6},
     }
 
